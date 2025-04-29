@@ -1,0 +1,29 @@
+#📜 Privacy Policy
+Last updated: April 29, 2025
+
+We respect your privacy. This LINE chatbot (“Public Kitchen Manager”) is a student project developed for academic purposes at Shu-Te University (樹德科技大學).
+
+1. What Data We Collect
+Student ID (for login and verification)
+
+Reservation details (date, time, user ID)
+
+Reported maintenance issues
+
+LINE user ID (used only to match user actions to data)
+
+2. How We Use Your Data
+To allow kitchen reservations and check availability
+
+To manage and track maintenance reports
+
+To identify users for accountability and prevent booking conflicts
+
+3. Data Storage and Retenti on
+All data is stored securely in a database (SQLite/MySQL) connected to our Java server. Data will be deleted after the academic term unless continued use is approved.
+
+4. Data Sharing
+We do not share your data with any third parties. Only the student developers and instructors have access for academic evaluation.
+
+5. Your Rights
+If you want your data deleted or corrected, please contact the student developers through your LINE chat or the school.                                                                                                                            
