@@ -1,97 +1,74 @@
-# === Java class files ===
-*.class
-
-# === Log files ===
-*.log
-
-# === BlueJ files ===
-*.ctxt
-
-# === Mobile Tools for Java (J2ME) ===
-.mtj.tmp/
-
-# === Package files ===
+# ========== BUILD OUTPUT ==========
+/target/
+/build/
+/bin/
+/out/
 *.jar
 *.war
 *.ear
 
-# === Build output ===
-/target/
-/build/
-
-# === Maven ===
+# ========== MAVEN ==========
 .mvn/
 !**/src/main/**/maven-wrapper.jar
-.mvn/wrapper/maven-wrapper.jar
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
 pom.xml.next
 release.properties
 
-# === Gradle ===
+# ========== GRADLE ==========
 .gradle/
-build/
 !gradle-wrapper.jar
 gradle-app.setting
 
-# === Wrapper JARs ===
+# ========== WRAPPER SCRIPTS ==========
 **/mvnw
 **/mvnw.cmd
 **/gradlew
 **/gradlew.bat
-**/gradle/wrapper/gradle-wrapper.properties
-**/gradle/wrapper/gradle-wrapper.jar
 
-# === VSCode ===
+# ========== IDE ==========
 .vscode/
-
-# === IntelliJ IDEA ===
 .idea/
 *.iml
-out/
-
-# === Eclipse ===
+*.ipr
+*.iws
 .project
 .classpath
 .settings/
 .csettings
-
-# === NetBeans ===
 nbproject/private/
 nbbuild/
 dist/
 nbdist/
 .nb-gradle/
 
-# === Environment & Dependency Management ===
-*.env
-*.env.*
-*.local
-*.properties.local
-
-# === macOS ===
-.DS_Store
-
-# === Windows ===
-Thumbs.db
-ehthumbs.db
-Desktop.ini
-
-# === Temporary & backup files ===
+# ========== TEMPORARY FILES ==========
 *.tmp
 *.bak
 *.swp
 *.swo
 *.orig
 *.rej
+*.log
 
-# === Test coverage ===
+# ========== ENVIRONMENT ==========
+*.env
+*.env.*
+*.local
+*.properties.local
+
+# ========== SYSTEM ==========
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ========== TEST COVERAGE ==========
 coverage/
 *.lcov
 
-# === Logs and Database Files ===
-*.log
+# ========== DATABASES ==========
 *.db
 *.h2.db
 *.mv.db
