@@ -63,6 +63,7 @@ nbdist/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+.txt
 
 # ========== TEST COVERAGE ==========
 coverage/
