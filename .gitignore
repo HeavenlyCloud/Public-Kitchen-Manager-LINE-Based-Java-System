@@ -1,37 +1,98 @@
-# Compiled class files
+# === Java class files ===
 *.class
 
-# Log files
+# === Log files ===
 *.log
 
-# BlueJ files
+# === BlueJ files ===
 *.ctxt
 
-# Mobile Tools for Java (J2ME)
+# === Mobile Tools for Java (J2ME) ===
 .mtj.tmp/
 
-# Package Files #
+# === Package files ===
 *.jar
 *.war
 *.ear
 
-# IntelliJ IDEA
+# === Build output ===
+/target/
+/build/
+
+# === Maven ===
+.mvn/
+!**/src/main/**/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+
+# === Gradle ===
+.gradle/
+build/
+!gradle-wrapper.jar
+gradle-app.setting
+
+# === Wrapper JARs ===
+**/mvnw
+**/mvnw.cmd
+**/gradlew
+**/gradlew.bat
+**/gradle/wrapper/gradle-wrapper.properties
+**/gradle/wrapper/gradle-wrapper.jar
+
+# === VSCode ===
+.vscode/
+
+# === IntelliJ IDEA ===
 .idea/
 *.iml
 out/
 
-# NetBeans
+# === Eclipse ===
+.project
+.classpath
+.settings/
+.csettings
+
+# === NetBeans ===
 nbproject/private/
-build/
 nbbuild/
 dist/
 nbdist/
 .nb-gradle/
 
-# Eclipse
-.project
-.classpath
-.csettings
-.settings/
-bin/
-target/
+# === Environment & Dependency Management ===
+*.env
+*.env.*
+*.local
+*.properties.local
+
+# === macOS ===
+.DS_Store
+
+# === Windows ===
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# === Temporary & backup files ===
+*.tmp
+*.bak
+*.swp
+*.swo
+*.orig
+*.rej
+
+# === Test coverage ===
+coverage/
+*.lcov
+
+# === Logs and Database Files ===
+*.log
+*.db
+*.h2.db
+*.mv.db
+*.trace.db
