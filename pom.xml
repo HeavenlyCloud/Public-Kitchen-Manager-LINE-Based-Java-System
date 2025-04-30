@@ -6,8 +6,9 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.4.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/> 
 	</parent>
+
 	<groupId>com.kitchenmanager</groupId>
 	<artifactId>linebot</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -30,14 +31,23 @@
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+	
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<version>3.4.5</version> 
 		</dependency>
+
+		<dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+        <version>3.4.5</version> 
+    </dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -45,11 +55,34 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+    <groupId>com.linecorp.bot</groupId>
+    <artifactId>line-bot-spring-boot</artifactId>
+    <version>5.0.0</version>
+		</dependency>
+
+		<!-- <dependency>
+    <groupId>mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <scope>runtime</scope>
+		</dependency> -->
+
+	<!-- Temporary | bounce back -->
+	<dependency>
+    <groupId>com.h2database</groupId>
+    <artifactId>h2</artifactId>
+    <scope>runtime</scope>
+	</dependency>
+
+	
+
 	</dependencies>
 
 	<build>
