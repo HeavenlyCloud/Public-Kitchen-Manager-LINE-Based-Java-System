@@ -9,5 +9,7 @@ public class KitchenLineBotApplication {
 
         System.out.println("Kitchen Manager Bot started"); // Debugging line to check if the application starts correctly
         SpringApplication.run(KitchenLineBotApplication.class, args); 
+
+        
     }
 }

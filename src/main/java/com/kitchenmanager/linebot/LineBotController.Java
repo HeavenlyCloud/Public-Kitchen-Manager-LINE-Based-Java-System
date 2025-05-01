@@ -11,7 +11,6 @@ public class LineBotController {
             @RequestHeader("X-Line-Signature") String signature,
             @RequestBody String payload) {
                 
-        // Check if the signature is valid
         if (!isValidSignature(payload, signature)) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid signature");
         }
