@@ -5,8 +5,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class HelloController {
-    @GetMapping("/")
-    public String hello() {
+    
+    @GetMapping("/status")
+    public String status() {
         return "Kitchen Manager Bot is running!";
     }
+
+    // @GetMapping("/ping")
+    // public String ping() {
+    //     return "pong";
+    // }
+
 }
