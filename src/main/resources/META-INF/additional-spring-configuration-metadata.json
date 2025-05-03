@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "line.channel-secret",
+  "type": "java.lang.String",
+  "description": "my channel secret"
+}]}

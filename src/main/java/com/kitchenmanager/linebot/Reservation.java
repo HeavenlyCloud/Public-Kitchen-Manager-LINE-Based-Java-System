@@ -12,6 +12,7 @@ public class Reservation {
 
   private String studentId;
   private String lineUserId;
+  
   private LocalDateTime startTime;
   private LocalDateTime endTime;
 
@@ -76,7 +77,6 @@ public class Reservation {
   public void setReservationStatus(ReservationStatus reservationStatus) {
     this.reservationStatus = reservationStatus;
   }
-
 
   public ReservationStatus getStatus() {
     return reservationStatus;

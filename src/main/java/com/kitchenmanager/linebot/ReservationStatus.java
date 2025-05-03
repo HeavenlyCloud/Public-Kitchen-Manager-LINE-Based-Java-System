@@ -1,6 +1,6 @@
 package com.kitchenmanager.linebot;
 
-import jakarta.persistence.*;
+// import jakarta.persistence.*;
 
 public enum ReservationStatus {
   PENDING,

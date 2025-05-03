@@ -42,7 +42,9 @@ public class LineBotController {
                 String messageText = event.message.text;
                 String userId = event.source.userId;
 
-                String reply = reservationService.processMessage(messageText);
+                String reply = reservationService.processMessage(messageText, userId);
+
+                
                 return ResponseEntity.ok(reply); 
             }
 
@@ -50,11 +52,7 @@ public class LineBotController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            // fallback string search in case JSON parsing fails
-            String fallbackText = extractMessageText(payload);
-            String fallbackReply = reservationService.processMessage(fallbackText);
-            
-            return ResponseEntity.ok("[Fallback] " + fallbackReply);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing webhook");
         }
     }
 
@@ -72,9 +70,9 @@ public class LineBotController {
         }
     }
 
-    private String extractMessageText(String payload) {
-        if (payload.contains("reserve")) return "reserve";
-        if (payload.contains("cancel")) return "cancel";
-        return "unknown";
-    }
+    // private String extractMessageText(String payload) {
+    //     if (payload.contains("reserve")) return "reserve";
+    //     if (payload.contains("cancel")) return "cancel";
+    //     return "unknown";
+    // }
 }

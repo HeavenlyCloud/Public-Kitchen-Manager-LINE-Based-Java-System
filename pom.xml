@@ -72,18 +72,26 @@
       <version>3.43.2.2</version> 
 		</dependency>
 
+		<dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-community-dialects</artifactId>
+      <version>6.4.4.Final</version> 
+    </dependency>
+
+
+
 		<!-- <dependency>
     <groupId>mysql</groupId>
     <artifactId>mysql-connector-j</artifactId>
     <scope>runtime</scope>
 		</dependency> -->
 
-	<!-- Temporary | bounce back -->
+	<!-- Temporary | bounce back
 	<dependency>
     <groupId>com.h2database</groupId>
     <artifactId>h2</artifactId>
     <scope>runtime</scope>
-	</dependency>
+	</dependency> -->
 
 	
 
