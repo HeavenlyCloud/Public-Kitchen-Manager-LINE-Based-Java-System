@@ -12,13 +12,28 @@ import java.util.Optional;
 public class ReservationService {
 
     @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
     private ReservationRepository reservationRepository;
 
-    public String processMessage(String messageText, String userId, String studentId) {
+    public String processMessage(String messageText, String userId) {
         String lower = messageText.toLowerCase().trim();
 
+        if (lower.startsWith("register")) {
+            String newStudentId = messageText.substring(8).trim();
+            return registerStudent(userId, newStudentId);
+        }
+
+        User user = userRepository.findByLineUserId(userId);
+        if (!lower.startsWith("register") && user == null) {
+            return "🛑 Please register your student ID first using: register <yourID>";
+        }
+
+        String studentId = user != null ? user.getStudentId() : null;
+
         if (lower.startsWith("report")) {
-            String description = messageText.substring(6).trim(); // get everything after 'report'
+            String description = messageText.substring(6).trim();
             return reportIssue(userId, studentId, description);
         }
 
@@ -115,6 +130,16 @@ public class ReservationService {
 
         issueReportRepository.save(report);
         return "🛠️ Your report has been received. Thank you!";
+    }
+
+    public String registerStudent(String lineUserId, String studentId) {
+        if (studentId.isBlank()) {
+            return "❗ Please provide your student ID after 'register'.";
+        }
+
+        User user = new User(lineUserId, studentId);
+        userRepository.save(user);
+        return "✅ Registration successful! Your student ID is now linked.";
     }
 
 }

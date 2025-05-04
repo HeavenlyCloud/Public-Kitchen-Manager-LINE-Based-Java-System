@@ -42,7 +42,7 @@ public class LineBotController {
                 String messageText = event.message.text;
                 String userId = event.source.userId;
 
-                String reply = reservationService.processMessage(messageText, userId, "24113324"); // studentId temporary 
+                String reply = reservationService.processMessage(messageText, userId); // studentId temporary 
                 
                 return ResponseEntity.ok(reply); 
             }
