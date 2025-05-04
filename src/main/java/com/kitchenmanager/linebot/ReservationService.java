@@ -14,10 +14,49 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
+
+    private Set<String> greetedUsers = new HashSet<>();
+
+    @PostConstruct
+    public void loadGreetedUsers() {
+        try {
+            Path path = Paths.get(greetedUsersFile);
+            if (Files.exists(path)) {
+                greetedUsers = Files.readAllLines(path).stream()
+                        .map(String::trim)
+                        .filter(line -> !line.isEmpty() && !line.startsWith("#"))
+                        .collect(Collectors.toSet());
+            }
+            System.out.println("👋 Loaded greeted users: " + greetedUsers.size());
+        } catch (IOException e) {
+            System.err.println("❌ Failed to load greeted users.");
+            e.printStackTrace();
+        }
+    }
+
+    @Value("${greeted.users.file}")
+    private String greetedUsersFile;
+
+    private void saveGreetedUser(String userId) {
+        if (greetedUsers.contains(userId))
+            return;
+
+        greetedUsers.add(userId);
+        try {
+            Files.write(Paths.get(greetedUsersFile), greetedUsers);
+            System.out.println("📥 Greeted new user: " + userId);
+        } catch (IOException e) {
+            System.err.println("❌ Failed to save greeted user.");
+            e.printStackTrace();
+        }
+    }
 
     @Value("${admin.ids.file}")
     private String adminIdsFile;
@@ -58,6 +97,20 @@ public class ReservationService {
     public String processMessage(String messageText, String userId) {
         updateCompletedReservations();
         String lower = messageText.toLowerCase().trim();
+
+        if (!greetedUsers.contains(userId)) {
+            saveGreetedUser(userId);
+            return """
+                    👋 Welcome to the Kitchen Reservation Bot!
+
+                    Here's what you can do:
+                    - register <yourStudentID>
+                    - reserve <yyyy-MM-dd HH:mm>
+                    - cancel | status | report <description>
+                    - help → for full list of commands
+                    - admin → if you’re an admin
+                    """;
+        }
 
         if (lower.startsWith("register")) {
             String newStudentId = messageText.substring(8).trim();
@@ -112,7 +165,9 @@ public class ReservationService {
             case "help":
                 return help();
             default:
-                return "🤖 I didn't understand that. Try 'help' to see commands.";
+                return "🤖 I didn't understand that.\nTry 'help' to see commands, or 'register <ID>' to begin."
+                        + "\n\n" +
+                        "If you are an admin, use 'admin' for more options.";
         }
     }
 
