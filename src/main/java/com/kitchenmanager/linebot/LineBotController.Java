@@ -30,9 +30,9 @@ public class LineBotController {
             @RequestHeader("X-Line-Signature") String signature,
             @RequestBody String payload) {
 
-        if (!isValidSignature(payload, signature)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid signature");
-        }
+        // if (!isValidSignature(payload, signature)) {
+        //     return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid signature");
+        // }
 
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -42,8 +42,7 @@ public class LineBotController {
                 String messageText = event.message.text;
                 String userId = event.source.userId;
 
-                String reply = reservationService.processMessage(messageText, userId);
-
+                String reply = reservationService.processMessage(messageText, userId, "24113324"); // studentId temporary 
                 
                 return ResponseEntity.ok(reply); 
             }

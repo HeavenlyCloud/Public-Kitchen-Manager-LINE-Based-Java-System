@@ -1,5 +1,12 @@
-{"properties": [{
-  "name": "line.channel-secret",
-  "type": "java.lang.String",
-  "description": "my channel secret"
-}]}
+{"properties": [
+  {
+    "name": "line.channel-secret",
+    "type": "java.lang.String",
+    "description": "my channel secret"
+  },
+  {
+    "name": "reservation.cooldown.hours",
+    "type": "java.lang.String",
+    "description": "A description for 'reservation.cooldown.hours'"
+  }
+]}

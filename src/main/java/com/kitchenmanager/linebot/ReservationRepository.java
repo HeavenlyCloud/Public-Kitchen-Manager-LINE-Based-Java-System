@@ -9,6 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+  Object countByReservationStatusAndEndTimeAfterReservationStatus = null;
+
   // All reservations made by a user
   List<Reservation> findByStudentId(String studentId);
   List<Reservation> findByLineUserId(String lineUserId);
@@ -30,6 +32,12 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
   );
 
   boolean existsByLineUserIdAndReservationStatus(String userId, ReservationStatus confirmed);
+
   Optional<Reservation> findTopByLineUserIdOrderByStartTimeDesc(String userId);
 
+  Reservation findTopByLineUserIdAndReservationStatusOrderByStartTimeDesc(String userId, ReservationStatus confirmed);
+
+  long countByReservationStatusAndEndTimeAfter(ReservationStatus status, LocalDateTime endTime);
+
+  
 }
