@@ -49,4 +49,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     ReservationStatus status,
     LocalDateTime endTime
 );
+
+      List<Reservation> findByReservationStatusAndEndTimeAfter(ReservationStatus confirmed, LocalDateTime now);
+
+      List<Reservation> findTop10ByOrderByStartTimeDesc();
+
+      long countByReservationStatus(ReservationStatus cancelled);
 }
