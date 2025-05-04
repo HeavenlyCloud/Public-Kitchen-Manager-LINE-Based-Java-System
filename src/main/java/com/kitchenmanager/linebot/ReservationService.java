@@ -9,6 +9,7 @@ import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.Path;
 // import java.time.format.DateTimeFormatter;
 import java.time.LocalDateTime;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
+
+    @Value("${admin.audit.file}")
+    private String adminAuditFile;
 
     private Set<String> greetedUsers = new HashSet<>();
 
@@ -149,6 +153,8 @@ public class ReservationService {
                 return clearAllReservations();
             if (lower.startsWith("check"))
                 return checkReservationsAt(messageText);
+            if (lower.equals("admin view audit"))
+                return viewAdminAudit();
             return "⚠️ Unknown admin command.";
         }
 
@@ -366,6 +372,7 @@ public class ReservationService {
             r.setReservationStatus(ReservationStatus.CANCELLED);
         }
         reservationRepository.saveAll(upcoming);
+        logAdminAction("SYSTEM", "cleared " + upcoming.size() + " reservations");
         return "🧹 Cleared " + upcoming.size() + " upcoming reservation(s).";
     }
 
@@ -404,6 +411,7 @@ public class ReservationService {
         return sb.toString();
     }
 
+    // TODO : Implement actual config reload logic
     public String reloadConfig() {
         // In a real Spring Boot app, this would trigger an actual reload.
         return "🔁 Reloaded configuration (simulated).";
@@ -454,6 +462,10 @@ public class ReservationService {
         // Optional: Log who added it
         System.out.println("👮 Admin " + issuerId + " added new admin: " + newAdminId);
         saveAdminIdsToFile();
+        logAdminAction(issuerId, "added new admin: " + newAdminId);
+        // TODO : Notify the new admin (if needed)
+        // lineMessagingService.pushMessage(newAdminId, "You have been added as an
+        // admin.");
         return "✅ Added new admin: " + newAdminId;
     }
 
@@ -473,6 +485,10 @@ public class ReservationService {
         // Optional: Log who removed whom
         System.out.println("🛑 Admin " + issuerId + " removed admin: " + removeId);
         saveAdminIdsToFile();
+        logAdminAction(issuerId, "removed admin: " + removeId);
+        // TODO : Notify the removed admin (if needed)
+        // lineMessagingService.pushMessage(removeId, "You have been removed as an
+        // admin.");
         return "✅ Removed admin: " + removeId;
 
     }
@@ -484,6 +500,38 @@ public class ReservationService {
         } catch (IOException e) {
             System.err.println("❌ Failed to save admin IDs to file.");
             e.printStackTrace();
+        }
+    }
+
+    private void logAdminAction(String userId, String actionDescription) {
+        String logEntry = String.format("[%s] Admin %s: %s%n",
+                LocalDateTime.now(), userId, actionDescription);
+        try {
+            Files.writeString(Paths.get(adminAuditFile), logEntry, StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND);
+            System.out.println("📝 Logged admin action: " + actionDescription);
+        } catch (IOException e) {
+            System.err.println("❌ Failed to write admin audit log.");
+            e.printStackTrace();
+        }
+    }
+
+    public String viewAdminAudit() {
+        try {
+            Path path = Paths.get(adminAuditFile);
+            if (!Files.exists(path))
+                return "📭 No admin audit log found.";
+
+            List<String> allLines = Files.readAllLines(path);
+            int total = allLines.size();
+            int start = Math.max(0, total - 10); // Last 10 lines
+
+            List<String> recent = allLines.subList(start, total);
+            return "📜 Last Admin Actions:\n" + String.join("\n", recent);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "❌ Failed to read admin audit log.";
         }
     }
 

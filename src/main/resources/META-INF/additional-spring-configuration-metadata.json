@@ -23,5 +23,15 @@
     "name": "greeted.users.file",
     "type": "java.lang.String",
     "description": "A description for 'greeted.users.file'"
+  },
+  {
+    "name": "admin.audit.file",
+    "type": "java.lang.String",
+    "description": "A description for 'admin.audit.file'"
+  },
+  {
+    "name": "line.channel-token",
+    "type": "java.lang.String",
+    "description": "A description for 'line.channel-token'"
   }
 ]}
