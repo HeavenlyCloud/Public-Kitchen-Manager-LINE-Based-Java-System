@@ -21,7 +21,7 @@ public class ReservationService {
             String description = messageText.substring(6).trim(); // get everything after 'report'
             return reportIssue(userId, studentId, description);
         }
-        
+
         switch (lower) {
             case "reserve":
                 return reserve(userId, studentId);
@@ -116,4 +116,5 @@ public class ReservationService {
         issueReportRepository.save(report);
         return "🛠️ Your report has been received. Thank you!";
     }
+
 }
