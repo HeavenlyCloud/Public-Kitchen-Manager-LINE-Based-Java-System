@@ -1,4 +1,4 @@
-package com.kitchenmanager.linebot; 
+package com.kitchenmanager.linebot;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.boot.CommandLineRunner;
@@ -10,22 +10,19 @@ import org.springframework.context.annotation.Bean;
 public class KitchenLineBotApplication {
     public static void main(String[] args) {
 
-        System.out.println("Kitchen Manager Bot started");
-        SpringApplication.run(KitchenLineBotApplication.class, args); 
-        
-        
+        SpringApplication.run(KitchenLineBotApplication.class, args);
+
     }
 
     @Bean
     public CommandLineRunner showBeans(ApplicationContext ctx) {
-    return args -> {
-        for (String name : ctx.getBeanDefinitionNames()) {
-            if (name.contains("line")) {
-                System.out.println("👀 Found bean: " + name);
+        return args -> {
+            for (String name : ctx.getBeanDefinitionNames()) {
+                if (name.contains("line")) {
+                    System.out.println("👀 Found bean: " + name);
+                }
             }
-        }
-    };
-    
+        };
 
     }
 

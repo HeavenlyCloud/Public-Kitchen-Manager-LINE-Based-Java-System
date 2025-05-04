@@ -15,17 +15,22 @@ public class ReservationService {
     private ReservationRepository reservationRepository;
 
     public String processMessage(String messageText, String userId, String studentId) {
-        switch (messageText.toLowerCase()) {
+        String lower = messageText.toLowerCase().trim();
+
+        if (lower.startsWith("report")) {
+            String description = messageText.substring(6).trim(); // get everything after 'report'
+            return reportIssue(userId, studentId, description);
+        }
+        
+        switch (lower) {
             case "reserve":
                 return reserve(userId, studentId);
             case "cancel":
                 return cancel(userId);
             case "status":
                 return getStatus(userId);
-            case "report":
-                return "📊 Reporting feature is not implemented yet.";
             default:
-                return "🤖 I didn't understand that. Try 'reserve', 'cancel', or 'status'.";
+                return "🤖 I didn't understand that. Try 'reserve', 'cancel', 'status', or 'report'.";
         }
     }
 
@@ -34,19 +39,21 @@ public class ReservationService {
 
     public String reserve(String userId, String studentId) {
 
-        long activeReservations = reservationRepository.countByReservationStatusAndEndTimeAfter(ReservationStatus.CONFIRMED, LocalDateTime.now());
+        long activeReservations = reservationRepository
+                .countByReservationStatusAndEndTimeAfter(ReservationStatus.CONFIRMED, LocalDateTime.now());
 
         if (activeReservations >= 5) {
             return "🚫 Sorry, the kitchen is full right now. Please try again later.";
         }
-        
 
+        boolean alreadyReserved = reservationRepository.existsByLineUserIdAndReservationStatus(userId,
+                ReservationStatus.CONFIRMED);
 
-        boolean alreadyReserved = reservationRepository.existsByLineUserIdAndReservationStatus(userId, ReservationStatus.CONFIRMED);
-        
-        Reservation lastConfirmedReservation = reservationRepository.findTopByLineUserIdAndReservationStatusOrderByStartTimeDesc(userId, ReservationStatus.CONFIRMED);
-        
-        if (lastConfirmedReservation != null && lastConfirmedReservation.getEndTime().isAfter(LocalDateTime.now().minusHours(cooldownHours)))  {
+        Reservation lastConfirmedReservation = reservationRepository
+                .findTopByLineUserIdAndReservationStatusOrderByStartTimeDesc(userId, ReservationStatus.CONFIRMED);
+
+        if (lastConfirmedReservation != null
+                && lastConfirmedReservation.getEndTime().isAfter(LocalDateTime.now().minusHours(cooldownHours))) {
             return "⏳ You need to wait before making another reservation.";
         }
 
@@ -68,10 +75,10 @@ public class ReservationService {
         String formattedEnd = reservation.getEndTime().format(formatter);
 
         return String.format("✅ Reservation confirmed from %s to %s.", formattedStart, formattedEnd);
-    } 
+    }
 
-    public String cancel(String userId){
-        Optional <Reservation> optional = reservationRepository.findTopByLineUserIdOrderByStartTimeDesc(userId);
+    public String cancel(String userId) {
+        Optional<Reservation> optional = reservationRepository.findTopByLineUserIdOrderByStartTimeDesc(userId);
         if (optional.isPresent()) {
             Reservation reservation = optional.get();
             reservation.setReservationStatus(ReservationStatus.CANCELLED);
@@ -82,7 +89,7 @@ public class ReservationService {
         }
     }
 
-    public String getStatus (String userId) {
+    public String getStatus(String userId) {
         Optional<Reservation> optional = reservationRepository.findTopByLineUserIdOrderByStartTimeDesc(userId);
         if (optional.isPresent()) {
             Reservation reservation = optional.get();
@@ -90,5 +97,23 @@ public class ReservationService {
         } else {
             return "ℹ️ No reservation found.";
         }
+    }
+
+    @Autowired
+    private IssueReportRepository issueReportRepository;
+
+    public String reportIssue(String userId, String studentId, String description) {
+        if (description == null || description.isBlank()) {
+            return "⚠️ Please describe the issue after 'report'.";
+        }
+
+        IssueReport report = new IssueReport();
+        report.setLineUserId(userId);
+        report.setStudentId(studentId);
+        report.setDescription(description);
+        report.setTimestamp(LocalDateTime.now());
+
+        issueReportRepository.save(report);
+        return "🛠️ Your report has been received. Thank you!";
     }
 }
