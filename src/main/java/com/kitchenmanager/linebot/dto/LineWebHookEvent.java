@@ -9,14 +9,17 @@ public class LineWebHookEvent {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Event {
+        public String type;            
+        public String replyToken;     
         public Source source;
         public Message message;
-        public String replyToken;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Source {
-        public String userId;
+        public String userId;          
+        public String groupId;         
+        public String type;            
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

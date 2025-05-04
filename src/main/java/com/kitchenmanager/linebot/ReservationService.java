@@ -104,6 +104,10 @@ public class ReservationService {
 
         if (!greetedUsers.contains(userId)) {
             saveGreetedUser(userId);
+            if (lower.startsWith("register")) {
+                String newStudentId = messageText.substring(8).trim();
+                return "👋 Welcome!\n" + registerStudent(userId, newStudentId);
+            }
             return """
                     👋 Welcome to the Kitchen Reservation Bot!
 
@@ -153,6 +157,8 @@ public class ReservationService {
                 return clearAllReservations();
             if (lower.startsWith("check"))
                 return checkReservationsAt(messageText);
+            if (lower.equals("admin reports"))
+                return viewAllReports();
             if (lower.equals("admin view audit"))
                 return viewAdminAudit();
             return "⚠️ Unknown admin command.";
@@ -535,4 +541,23 @@ public class ReservationService {
         }
     }
 
+    public String viewAllReports() {
+        List<IssueReport> reports = issueReportRepository.findAll();
+    
+        if (reports.isEmpty()) {
+            return "📭 No issue reports found.";
+        }
+    
+        StringBuilder sb = new StringBuilder("🛠 Issue Reports:\n");
+    
+        for (IssueReport r : reports) {
+            sb.append(String.format("- %s (%s): %s\n",
+                    r.getStudentId(),
+                    r.getTimestamp(),
+                    r.getDescription()));
+        }
+    
+        return sb.toString();
+    }
+    
 }

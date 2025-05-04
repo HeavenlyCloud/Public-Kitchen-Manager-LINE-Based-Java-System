@@ -15,6 +15,9 @@ import java.util.Base64;
 @RestController
 public class LineBotController {
 
+    @Value("${bot.command.prefix}")
+    private String prefix;
+
     @Value("${line.channel-token}")
     private String channelToken;
 
@@ -31,12 +34,12 @@ public class LineBotController {
 
     @PostMapping("/callback")
     public ResponseEntity<String> callback(
+            @RequestHeader("X-Line-Signature") String signature,
+            @RequestBody String payload) {
 
-        @RequestHeader("X-Line-Signature") String signature,
-        @RequestBody String payload) {
+        System.out.println("📥 Raw LINE payload:\n" + payload);
 
-    System.out.println("📥 Raw LINE payload:\n" + payload);
-
+        // Optional: re-enable if you want security verification
         // if (!isValidSignature(payload, signature)) {
         // return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid signature");
         // }
@@ -46,19 +49,39 @@ public class LineBotController {
             LineWebHookEvent webhook = mapper.readValue(payload, LineWebHookEvent.class);
 
             for (LineWebHookEvent.Event event : webhook.events) {
-                if (event == null || event.message == null || event.message.text == null || event.replyToken == null) {
-                    System.out.println("⚠️ Skipping non-text or malformed event: " + new ObjectMapper().writeValueAsString(event));
+                if (event == null || event.replyToken == null) {
+                    System.out.println("⚠️ Skipping malformed event.");
                     continue;
                 }
-            
-                String messageText = event.message.text.trim();
-                String userId = event.source.userId;
-                String reply = reservationService.processMessage(messageText, userId);
-            
-                System.out.printf("👤 LINE user %s said: \"%s\" → %s\n", userId, messageText, reply);
-                sendReply(event.replyToken, reply);
+
+                String reply = null;
+
+                // 🟢 Greet on join or follow
+                if ("join".equals(event.type) || "follow".equals(event.type)) {
+                    reply = "👋 Hi! I’m your Kitchen Bot.\nType `" + prefix + "help` or `" + prefix
+                            + "register <ID>` to begin.";
+                }
+
+                // 💬 Handle only messages with correct prefix
+                else if ("message".equals(event.type) && event.message != null && event.message.text != null) {
+                    String messageText = event.message.text.trim();
+                    if (!messageText.startsWith(prefix)) {
+                        System.out.println("⚠️ Ignoring message without prefix: " + messageText);
+                        continue;
+                    }
+
+                    String command = messageText.substring(prefix.length()).trim();
+                    String userId = event.source.userId;
+                    reply = reservationService.processMessage(command, userId);
+
+                    System.out.printf("👤 LINE user %s said: \"%s\" → %s\n", userId, command, reply);
+                }
+
+                // ✉️ Send reply if any
+                if (reply != null) {
+                    sendReply(event.replyToken, reply);
+                }
             }
-            
 
             return ResponseEntity.ok("OK");
 
@@ -67,6 +90,7 @@ public class LineBotController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error processing webhook");
         }
     }
+
 
     private boolean isValidSignature(String payload, String signature) {
         try {
@@ -84,6 +108,10 @@ public class LineBotController {
 
     private void sendReply(String replyToken, String messageText) {
         try {
+            String safeText = messageText
+                    .replace("\"", "\\\"") // escape quotes
+                    .replace("\n", "\\n"); // escape newlines
+
             String json = """
                     {
                         "replyToken": "%s",
@@ -92,7 +120,7 @@ public class LineBotController {
                             "text": "%s"
                         }]
                     }
-                    """.formatted(replyToken, messageText.replace("\"", "\\\"")); // escape quotes
+                    """.formatted(replyToken, safeText);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -103,8 +131,15 @@ public class LineBotController {
                     "https://api.line.me/v2/bot/message/reply", request, String.class);
 
             System.out.println("📤 Sent LINE reply: " + response.getStatusCode());
+            System.out.println("📨 Response body: " + response.getBody());
+            System.out.println("🧾 Payload:\n" + json);
+
+            if (response.getStatusCode() != HttpStatus.OK) {
+                System.err.println("❌ LINE API rejected the message. See above for body.");
+            }
 
         } catch (Exception e) {
+            System.err.println("❌ Exception while sending LINE reply:");
             e.printStackTrace();
         }
     }
