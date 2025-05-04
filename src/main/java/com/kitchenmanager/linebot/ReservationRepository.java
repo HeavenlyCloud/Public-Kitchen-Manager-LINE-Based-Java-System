@@ -13,12 +13,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
   // All reservations made by a user
   List<Reservation> findByStudentId(String studentId);
+
   List<Reservation> findByLineUserId(String lineUserId);
 
   // Reservations with specific status
   List<Reservation> findByStudentIdAndReservationStatus(String studentId, ReservationStatus status);
-  List<Reservation> findByLineUserIdAndReservationStatus(String lineUserId, ReservationStatus status);
 
+  List<Reservation> findByLineUserIdAndReservationStatus(String lineUserId, ReservationStatus status);
 
   // Reservations within a time range
   List<Reservation> findByStartTimeBetween(LocalDateTime start, LocalDateTime end);
@@ -28,8 +29,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
       String studentId,
       ReservationStatus status,
       LocalDateTime start,
-      LocalDateTime end
-  );
+      LocalDateTime end);
 
   boolean existsByLineUserIdAndReservationStatus(String userId, ReservationStatus confirmed);
 
@@ -39,5 +39,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
   long countByReservationStatusAndEndTimeAfter(ReservationStatus status, LocalDateTime endTime);
 
-  
+  List<Reservation> findByReservationStatusAndStartTimeBetween(
+      ReservationStatus status,
+      LocalDateTime start,
+      LocalDateTime end);
+
+
+      List<Reservation> findByReservationStatusAndEndTimeBefore(
+    ReservationStatus status,
+    LocalDateTime endTime
+);
 }

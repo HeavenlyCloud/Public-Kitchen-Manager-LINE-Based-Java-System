@@ -18,6 +18,9 @@ public class ReservationService {
     private ReservationRepository reservationRepository;
 
     public String processMessage(String messageText, String userId) {
+
+        updateCompletedReservations();
+        
         String lower = messageText.toLowerCase().trim();
 
         if (lower.startsWith("register")) {
@@ -39,7 +42,7 @@ public class ReservationService {
 
         switch (lower) {
             case "reserve":
-                return reserve(userId, studentId);
+                return reserve(userId, studentId, messageText);
             case "cancel":
                 return cancel(userId);
             case "status":
@@ -52,44 +55,64 @@ public class ReservationService {
     @Value("${reservation.cooldown.hours}")
     private int cooldownHours;
 
-    public String reserve(String userId, String studentId) {
+    public String reserve(String userId, String studentId, String messageText) {
+        try {
+            String[] parts = messageText.split(" ", 2);
+            LocalDateTime startTime;
 
-        long activeReservations = reservationRepository
-                .countByReservationStatusAndEndTimeAfter(ReservationStatus.CONFIRMED, LocalDateTime.now());
+            if (parts.length == 2) {
+                startTime = LocalDateTime.parse(parts[1].trim(), TimeUtil.FORMATTER);
+            } else {
+                startTime = LocalDateTime.now();
+            }
 
-        if (activeReservations >= 5) {
-            return "🚫 Sorry, the kitchen is full right now. Please try again later.";
+            LocalDateTime endTime = startTime.plusHours(1);
+
+            // Check if user is spamming reservations (cooldown)
+            Reservation lastConfirmed = reservationRepository
+                    .findTopByLineUserIdAndReservationStatusOrderByStartTimeDesc(userId, ReservationStatus.CONFIRMED);
+            if (lastConfirmed != null &&
+                    lastConfirmed.getEndTime().isAfter(LocalDateTime.now().minusHours(cooldownHours))) {
+                return "⏳ You need to wait before making another reservation.";
+            }
+
+            // Prevent duplicates
+            boolean alreadyReserved = reservationRepository.existsByLineUserIdAndReservationStatus(userId,
+                    ReservationStatus.CONFIRMED);
+            if (alreadyReserved) {
+                return "❌ You already have a reservation. Cancel it first.";
+            }
+
+            // Check number of overlapping reservations
+            var overlapping = reservationRepository
+                    .findByReservationStatusAndStartTimeBetween(ReservationStatus.CONFIRMED, startTime.minusHours(1),
+                            endTime);
+            long conflictCount = overlapping.stream()
+                    .filter(r -> r.getEndTime().isAfter(startTime) && r.getStartTime().isBefore(endTime))
+                    .count();
+
+            if (conflictCount >= 3) {
+                return "🚫 That time slot already has 3 users. Please pick another.";
+            }
+
+            // Proceed to reserve
+            Reservation reservation = new Reservation();
+            reservation.setLineUserId(userId);
+            reservation.setStudentId(studentId);
+            reservation.setStartTime(startTime);
+            reservation.setEndTime(endTime);
+            reservation.setReservationStatus(ReservationStatus.CONFIRMED);
+            reservationRepository.save(reservation);
+
+            String formattedStart = TimeUtil.format(startTime);
+            String formattedEnd = TimeUtil.format(endTime);
+
+            return String.format("✅ Reserved!\n🕒 %s to %s\n👥 You’re #%d in this time slot.", formattedStart,
+                    formattedEnd, conflictCount + 1);
+
+        } catch (Exception e) {
+            return "⚠️ Invalid format. Use:\nreserve yyyy-MM-dd HH:mm";
         }
-
-        boolean alreadyReserved = reservationRepository.existsByLineUserIdAndReservationStatus(userId,
-                ReservationStatus.CONFIRMED);
-
-        Reservation lastConfirmedReservation = reservationRepository
-                .findTopByLineUserIdAndReservationStatusOrderByStartTimeDesc(userId, ReservationStatus.CONFIRMED);
-
-        if (lastConfirmedReservation != null
-                && lastConfirmedReservation.getEndTime().isAfter(LocalDateTime.now().minusHours(cooldownHours))) {
-            return "⏳ You need to wait before making another reservation.";
-        }
-
-        if (alreadyReserved) {
-            return "❌ You already have a reservation. Please cancel it before making a new one.";
-        }
-
-        Reservation reservation = new Reservation();
-        reservation.setLineUserId(userId);
-        reservation.setStudentId(studentId);
-        reservation.setStartTime(LocalDateTime.now());
-        reservation.setEndTime(LocalDateTime.now().plusHours(1));
-        reservation.setReservationStatus(ReservationStatus.CONFIRMED);
-
-        reservationRepository.save(reservation);
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("h:mm a");
-        String formattedStart = reservation.getStartTime().format(formatter);
-        String formattedEnd = reservation.getEndTime().format(formatter);
-
-        return String.format("✅ Reservation confirmed from %s to %s.", formattedStart, formattedEnd);
     }
 
     public String cancel(String userId) {
@@ -140,6 +163,22 @@ public class ReservationService {
         User user = new User(lineUserId, studentId);
         userRepository.save(user);
         return "✅ Registration successful! Your student ID is now linked.";
+    }
+
+    public void updateCompletedReservations() {
+        LocalDateTime now = LocalDateTime.now();
+        var expired = reservationRepository.findByReservationStatusAndEndTimeBefore(
+                ReservationStatus.CONFIRMED, now);
+
+        for (Reservation r : expired) {
+            r.setReservationStatus(ReservationStatus.COMPLETED);
+        }
+
+        reservationRepository.saveAll(expired);
+
+        if (!expired.isEmpty()) {
+            System.out.println("🔁 Marked " + expired.size() + " reservation(s) as COMPLETED.");
+        }
     }
 
 }
