@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: kitchen-line-bot
+    env: java
+    plan: free
+    buildCommand: ./mvnw clean package
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: LINE_CHANNEL_SECRET
+        sync: false
+      - key: LINE_CHANNEL_TOKEN
+        sync: false
+    autoDeploy: true

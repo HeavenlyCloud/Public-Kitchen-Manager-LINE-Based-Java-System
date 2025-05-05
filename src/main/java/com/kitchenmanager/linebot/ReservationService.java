@@ -112,11 +112,13 @@ public class ReservationService {
                     👋 Welcome to the Kitchen Reservation Bot!
 
                     Here's what you can do:
-                    - register <yourStudentID>
-                    - reserve <yyyy-MM-dd HH:mm>
-                    - cancel | status | report <description>
-                    - help → for full list of commands
-                    - admin → if you’re an admin
+                    - !register (yourStudentID)
+                    - !reserve yyyy-MM-dd HH:mm>
+                    - !cancel 
+                    - !status
+                    - !report <description>
+                    - !help → for full list of commands
+                    - !admin → if you’re an admin
                     """;
         }
 
