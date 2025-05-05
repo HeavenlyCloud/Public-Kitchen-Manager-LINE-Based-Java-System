@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface IssueReportRepository extends JpaRepository<IssueReport, Long> {
 
     // Custom query methods can be defined here if needed
