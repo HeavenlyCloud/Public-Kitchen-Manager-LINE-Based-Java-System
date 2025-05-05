@@ -39,10 +39,9 @@ public class LineBotController {
 
         System.out.println("📥 Raw LINE payload:\n" + payload);
 
-        // Optional: re-enable if you want security verification
-        // if (!isValidSignature(payload, signature)) {
-        // return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid signature");
-        // }
+        if (!isValidSignature(payload, signature)) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Invalid signature");
+        }
 
         try {
             ObjectMapper mapper = new ObjectMapper();
