@@ -1,0 +1,42 @@
+{"properties": [
+  {
+    "name": "line.channel-secret",
+    "type": "java.lang.String",
+    "description": "my channel secret"
+  },
+  {
+    "name": "reservation.cooldown.hours",
+    "type": "java.lang.String",
+    "description": "A description for 'reservation.cooldown.hours'"
+  },
+  {
+    "name": "admin.line-user-ids",
+    "type": "java.lang.String",
+    "description": "A description for 'admin.line-user-ids'"
+  },
+  {
+    "name": "admin.ids.file",
+    "type": "java.lang.String",
+    "description": "A description for 'admin.ids.file'"
+  },
+  {
+    "name": "greeted.users.file",
+    "type": "java.lang.String",
+    "description": "A description for 'greeted.users.file'"
+  },
+  {
+    "name": "admin.audit.file",
+    "type": "java.lang.String",
+    "description": "A description for 'admin.audit.file'"
+  },
+  {
+    "name": "line.channel-token",
+    "type": "java.lang.String",
+    "description": "A description for 'line.channel-token'"
+  },
+  {
+    "name": "bot.command.prefix",
+    "type": "java.lang.String",
+    "description": "A description for 'bot.command.prefix'"
+  }
+]}

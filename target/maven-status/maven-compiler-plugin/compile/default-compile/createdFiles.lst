@@ -1,0 +1,16 @@
+com\kitchenmanager\linebot\KitchenLineBotApplication.class
+com\kitchenmanager\linebot\ReservationService.class
+com\kitchenmanager\linebot\dto\LineWebHookEvent.class
+com\kitchenmanager\linebot\IssueReportRepository.class
+com\kitchenmanager\linebot\LineBotController.class
+com\kitchenmanager\linebot\User.class
+com\kitchenmanager\linebot\Reservation.class
+com\kitchenmanager\linebot\IssueReport.class
+com\kitchenmanager\linebot\ReservationRepository.class
+com\kitchenmanager\linebot\HelloController.class
+com\kitchenmanager\linebot\UserRepository.class
+com\kitchenmanager\linebot\ReservationStatus.class
+com\kitchenmanager\linebot\dto\LineWebHookEvent$Source.class
+com\kitchenmanager\linebot\dto\LineWebHookEvent$Event.class
+com\kitchenmanager\linebot\TimeUtil.class
+com\kitchenmanager\linebot\dto\LineWebHookEvent$Message.class
