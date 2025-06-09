@@ -62,27 +62,48 @@ public class ReservationService {
         }
     }
 
+    @Value("${admin.line-user-ids:}")
+    private String adminIdsFromProperties;
+
     @Value("${admin.ids.file}")
     private String adminIdsFile;
 
     @PostConstruct
     public void loadAdminIdsFromFile() {
+        Set<String> combined = new HashSet<>();
 
+        // Load from file
         try {
             Path path = Paths.get(adminIdsFile);
             if (Files.exists(path)) {
-                adminLineUserIds = Files.readAllLines(path).stream()
+                List<String> fileIds = Files.readAllLines(path).stream()
                         .map(String::trim)
                         .filter(line -> !line.isEmpty())
-                        .toList();
-                System.out.println("✅ Loaded admin IDs: " + adminLineUserIds);
+                        .collect(Collectors.toList());
+                combined.addAll(fileIds);
+                System.out.println("📂 Loaded admin IDs from file: " + fileIds);
             } else {
-                adminLineUserIds = new ArrayList<>();
-                System.out.println("⚠️ Admin ID file not found. Starting with empty list.");
+                System.out.println("⚠️ Admin ID file not found. Starting with empty file-based list.");
             }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load admin IDs from file", e);
+            System.err.println("❌ Failed to load admin IDs from file.");
+            e.printStackTrace();
         }
+
+        // Load from properties
+        if (adminIdsFromProperties != null && !adminIdsFromProperties.isBlank()) {
+            List<String> propIds = List.of(adminIdsFromProperties.split(","))
+                    .stream()
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+            combined.addAll(propIds);
+            System.out.println("⚙️ Loaded admin IDs from properties: " + propIds);
+        }
+
+        // Replace adminLineUserIds
+        adminLineUserIds = new ArrayList<>(combined);
+        System.out.println("✅ Final admin list: " + adminLineUserIds);
     }
 
     @Value("#{'${admin.line-user-ids}'.split(',')}")
@@ -114,7 +135,7 @@ public class ReservationService {
                     Here's what you can do:
                     - !register (yourStudentID)
                     - !reserve yyyy-MM-dd HH:mm>
-                    - !cancel 
+                    - !cancel
                     - !status
                     - !report <description>
                     - !help → for full list of commands
@@ -545,21 +566,21 @@ public class ReservationService {
 
     public String viewAllReports() {
         List<IssueReport> reports = issueReportRepository.findAll();
-    
+
         if (reports.isEmpty()) {
             return "📭 No issue reports found.";
         }
-    
+
         StringBuilder sb = new StringBuilder("🛠 Issue Reports:\n");
-    
+
         for (IssueReport r : reports) {
             sb.append(String.format("- %s (%s): %s\n",
                     r.getStudentId(),
                     r.getTimestamp(),
                     r.getDescription()));
         }
-    
+
         return sb.toString();
     }
-    
+
 }
