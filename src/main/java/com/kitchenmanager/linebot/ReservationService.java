@@ -1,24 +1,24 @@
 package com.kitchenmanager.linebot;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+// import java.time.format.DateTimeFormatter;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.Path;
-// import java.time.format.DateTimeFormatter;
-import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -72,7 +72,6 @@ public class ReservationService {
     public void loadAdminIdsFromFile() {
         Set<String> combined = new HashSet<>();
 
-        // Load from file
         try {
             Path path = Paths.get(adminIdsFile);
             if (Files.exists(path)) {
@@ -90,7 +89,6 @@ public class ReservationService {
             e.printStackTrace();
         }
 
-        // Load from properties
         if (adminIdsFromProperties != null && !adminIdsFromProperties.isBlank()) {
             List<String> propIds = List.of(adminIdsFromProperties.split(","))
                     .stream()
@@ -101,7 +99,6 @@ public class ReservationService {
             System.out.println("⚙️ Loaded admin IDs from properties: " + propIds);
         }
 
-        // Replace adminLineUserIds
         adminLineUserIds = new ArrayList<>(combined);
         System.out.println("✅ Final admin list: " + adminLineUserIds);
     }
@@ -153,13 +150,25 @@ public class ReservationService {
             return "🛑 Please register your student ID first using: register <yourID>";
         }
 
+        if (user == null || user.getStudentId() == null || user.getStudentId().isBlank()) {
+            return "🛑 You're not fully registered. Please register again using: register <yourID>";
+        }
+
         String studentId = user.getStudentId();
 
         // 🔐 Admin-only block
-        if (lower.startsWith("admin") || List.of("list", "clear", "check").contains(lower.split(" ")[0])) {
+        if (lower.startsWith("admin")
+                || List.of("list", "clear", "check", "unregister").contains(lower.split(" ")[0])) {
+
             if (!isAdmin(userId))
                 return "🚫 Admin command. Access denied.";
-
+            if (lower.equals("admin help") || lower.equals("admin"))
+                return adminHelp();
+            if (lower.startsWith("admin unregister")) {
+                if (lower.startsWith("admin unregister")) {
+                    return adminUnregister(messageText, userId);
+                }
+            }
             if (lower.equals("admin"))
                 return adminHelp();
             if (lower.equals("admin stats"))
@@ -204,6 +213,28 @@ public class ReservationService {
                         + "\n\n" +
                         "If you are an admin, use 'admin' for more options.";
         }
+    }
+
+    public String adminUnregister(String messageText, String issuerId) {
+        String[] parts = messageText.split("\\s+");
+        if (parts.length != 3) {
+            return "⚠️ Usage: admin unregister <studentId>";
+        }
+
+        String targetId = parts[2].trim();
+
+        if (!targetId.matches("\\d{8}")) {
+            return "⚠️ Invalid student ID format. Must be 8 digits.";
+        }
+
+        User user = userRepository.findByStudentId(targetId);
+        if (user == null) {
+            return "❌ No user found with that student ID.";
+        }
+
+        userRepository.delete(user);
+        logAdminAction(issuerId, "unregistered student: " + targetId);
+        return "🗑️ Successfully unregistered student ID: " + targetId;
     }
 
     @Value("${reservation.cooldown.hours}")
@@ -312,6 +343,15 @@ public class ReservationService {
     public String registerStudent(String lineUserId, String studentId) {
         if (studentId.isBlank()) {
             return "❗ Please provide your student ID after 'register'.";
+        }
+
+        if (!studentId.matches("\\d{8}")) {
+            return "⚠️ Invalid student ID format. Use 8 digits only.";
+        }
+
+        User existing = userRepository.findByLineUserId(lineUserId);
+        if (existing != null) {
+            return "ℹ️ You're already registered. Use 'status' or 'reserve'.";
         }
 
         User user = new User(lineUserId, studentId);
@@ -460,22 +500,24 @@ public class ReservationService {
                 "- !admin logs\n" +
                 "- !admin reload\n" +
                 "- !admin ids\n" +
-                "- !admin add <LINE_USER_ID>\n" +
-                "- !admin remove <LINE_USER_ID>\n" +
+                "- !admin add <line user id> e.g. !admin add 24113324\n" +
+                "- !admin remove <line user id> e.g. !admin remove 24113324\n" +
+                "- !admin unregister <studentId>\n" +
                 "- !list\n" +
                 "- !clear\n" +
-                "- !check <yyyy-MM-dd HH:mm>";
+                "- !check <yyyy-MM-dd HH:mm> e.g. !check 2023-10-01 12:00\n" +
+                "- !admin reports\n";
     }
 
     public String help() {
         return "🤖 Available commands:\n" +
                 "- !register <yourID>\n" +
-                "- !reserve <yyyy-MM-dd HH:mm>\n" +
+                "- !reserve <yyyy-MM-dd HH:mm> e.g. !reserve 2023-10-01 12:00\n" +
                 "- !cancel\n" +
                 "- !status\n" +
                 "- !report <description>\n" +
                 "- !help\n" +
-                "- !admin (if you’re an admin)";
+                "- !admin (if you’re an admin) :>";
     }
 
     public String addAdmin(String messageText, String issuerId) {
@@ -580,5 +622,7 @@ public class ReservationService {
 
         return sb.toString();
     }
+
+    // TODO: Integrate LIFF front-end here in future.
 
 }
