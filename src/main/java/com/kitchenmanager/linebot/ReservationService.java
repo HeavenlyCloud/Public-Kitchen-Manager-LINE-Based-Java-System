@@ -511,7 +511,7 @@ public class ReservationService {
 
     public String help() {
         return "🤖 Available commands:\n" +
-                "- !register <yourID>\n" +
+                "- !register <yourID> e.g. !register 24113324\n" +
                 "- !reserve <yyyy-MM-dd HH:mm> e.g. !reserve 2023-10-01 12:00\n" +
                 "- !cancel\n" +
                 "- !status\n" +
