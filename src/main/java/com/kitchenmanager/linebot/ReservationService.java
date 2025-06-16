@@ -129,7 +129,10 @@ public class ReservationService {
             return """
                     👋 Welcome to the Kitchen Reservation Bot!
 
-                    Here's what you can do:
+                    first, please register your student ID using:
+                    - !register (yourStudentID)
+
+                    Here's what you can do after registering your student ID:
                     - !register (yourStudentID)
                     - !reserve yyyy-MM-dd HH:mm>
                     - !cancel
@@ -147,11 +150,11 @@ public class ReservationService {
 
         User user = userRepository.findByLineUserId(userId);
         if (!lower.startsWith("register") && user == null) {
-            return "🛑 Please register your student ID first using: register <yourID>";
+            return "🛑 Please register your student ID first using: !register <yourID>";
         }
 
         if (user == null || user.getStudentId() == null || user.getStudentId().isBlank()) {
-            return "🛑 You're not fully registered. Please register again using: register <yourID>";
+            return "🛑 You're not fully registered. Please register again using: !register <yourID>";
         }
 
         String studentId = user.getStudentId();
@@ -209,9 +212,12 @@ public class ReservationService {
             case "help":
                 return help();
             default:
-                return "🤖 I didn't understand that.\nTry 'help' to see commands, or 'register <ID>' to begin."
-                        + "\n\n" +
-                        "If you are an admin, use 'admin' for more options.";
+                return String.format("""
+                        🤖 Unknown command: '%s'
+                        Type 'help' for available commands.
+                        If you're an admin, type 'admin' to see admin commands.
+                        """, lower.split(" ")[0]);
+
         }
     }
 
@@ -351,7 +357,7 @@ public class ReservationService {
 
         User existing = userRepository.findByLineUserId(lineUserId);
         if (existing != null) {
-            return "ℹ️ You're already registered. Use 'status' or 'reserve'.";
+            return "ℹ️ You're already registered. Use '!status' or '!reserve'.";
         }
 
         User user = new User(lineUserId, studentId);
@@ -523,20 +529,28 @@ public class ReservationService {
     public String addAdmin(String messageText, String issuerId) {
         String[] parts = messageText.split(" ", 3);
         if (parts.length < 3)
-            return "⚠️ Usage: admin add <LINE_USER_ID>";
+            return "⚠️ Usage: admin add <LINE_USER_ID> or admin add student <studentId>";
 
-        String newAdminId = parts[2].trim();
-        if (adminLineUserIds.contains(newAdminId))
+        String target = parts[2].trim();
+
+        if (parts[1].equals("student")) {
+            // Add by student ID
+            if (!target.matches("\\d{8}")) {
+                return "❗ Invalid student ID format.";
+            }
+
+            User user = userRepository.findByStudentId(target);
+            if (user == null)
+                return "❌ No user found with that student ID.";
+
+            target = user.getLineUserId(); // convert to lineUserId
+        }
+
+        if (adminLineUserIds.contains(target))
             return "ℹ️ That user is already an admin.";
-
-        adminLineUserIds.add(newAdminId);
-        System.out.println("👮 Admin " + issuerId + " added new admin: " + newAdminId);
-        saveAdminIdsToFile();
-        logAdminAction(issuerId, "added new admin: " + newAdminId);
-        // TODO : Notify the new admin (if needed)
-        // lineMessagingService.pushMessage(newAdminId, "You have been added as an
-        // admin.");
-        return "✅ Added new admin: " + newAdminId;
+        return target + " is now an admin. ✅\n" +
+                "Admin added by: " + issuerId + "\n" +
+                "To remove them, use: admin remove <LINE_USER_ID>";
     }
 
     public String removeAdmin(String messageText, String issuerId) {
