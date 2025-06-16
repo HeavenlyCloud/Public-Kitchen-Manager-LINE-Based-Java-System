@@ -456,26 +456,26 @@ public class ReservationService {
 
     public String adminHelp() {
         return "🤖 Admin commands:\n" +
-                "- admin stats\n" +
-                "- admin logs\n" +
-                "- admin reload\n" +
-                "- admin ids\n" +
-                "- admin add <LINE_USER_ID>\n" +
-                "- admin remove <LINE_USER_ID>\n" +
-                "- list\n" +
-                "- clear\n" +
-                "- check <yyyy-MM-dd HH:mm>";
+                "- !admin stats\n" +
+                "- !admin logs\n" +
+                "- !admin reload\n" +
+                "- !admin ids\n" +
+                "- !admin add <LINE_USER_ID>\n" +
+                "- !admin remove <LINE_USER_ID>\n" +
+                "- !list\n" +
+                "- !clear\n" +
+                "- !check <yyyy-MM-dd HH:mm>";
     }
 
     public String help() {
         return "🤖 Available commands:\n" +
-                "- register <yourID>\n" +
-                "- reserve <yyyy-MM-dd HH:mm>\n" +
-                "- cancel\n" +
-                "- status\n" +
-                "- report <description>\n" +
-                "- help\n" +
-                "- admin (if you’re an admin)";
+                "- !register <yourID>\n" +
+                "- !reserve <yyyy-MM-dd HH:mm>\n" +
+                "- !cancel\n" +
+                "- !status\n" +
+                "- !report <description>\n" +
+                "- !help\n" +
+                "- !admin (if you’re an admin)";
     }
 
     public String addAdmin(String messageText, String issuerId) {
@@ -488,7 +488,6 @@ public class ReservationService {
             return "ℹ️ That user is already an admin.";
 
         adminLineUserIds.add(newAdminId);
-        // Optional: Log who added it
         System.out.println("👮 Admin " + issuerId + " added new admin: " + newAdminId);
         saveAdminIdsToFile();
         logAdminAction(issuerId, "added new admin: " + newAdminId);
@@ -511,7 +510,6 @@ public class ReservationService {
             return "🚫 You cannot remove yourself.";
 
         adminLineUserIds.remove(removeId);
-        // Optional: Log who removed whom
         System.out.println("🛑 Admin " + issuerId + " removed admin: " + removeId);
         saveAdminIdsToFile();
         logAdminAction(issuerId, "removed admin: " + removeId);
